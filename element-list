@@ -1,0 +1,5 @@
+module:io.github.lambdaphoenix.simpleterminal
+io.github.lambdaphoenix.simpleterminal.ansi
+io.github.lambdaphoenix.simpleterminal.box
+io.github.lambdaphoenix.simpleterminal.core
+io.github.lambdaphoenix.simpleterminal.prompt
