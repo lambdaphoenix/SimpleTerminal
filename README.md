@@ -1,4 +1,7 @@
 # SimpleTerminal
+[![Javadoc](https://img.shields.io/badge/docs-Javadoc-blue)](https://lambdaphoenix.github.io/SimpleTerminal/)
+[![Changelog](https://img.shields.io/badge/Changelog-available-brightgreen.svg)](./CHANGELOG.md)
+[![GitHub License](https://img.shields.io/github/license/lambdaphoenix/SimpleTerminal)](./LICENSE)
 
 >A Java library for **styled console output** and **interactive prompts**.  
 SimpleTerminal provides a fluent API for ANSI colors, text styles, box rendering, and user input with validation and internationalization support.
@@ -83,3 +86,15 @@ void main() throws IOException {
 ```
 
 ---
+
+## 📖 Documentation
+- [**Javadoc**](https://lambdaphoenix.github.io/SimpleTerminal/)  
+  The complete API reference, automatically generated and published via GitHub Pages.
+
+- [**Changelog**](./CHANGELOG.md)  
+  A detailed list of all notable changes, new features, and fixes for each release.
+
+---
+
+## 📜 License
+This project is licensed under the [GPL License](./LICENSE).
