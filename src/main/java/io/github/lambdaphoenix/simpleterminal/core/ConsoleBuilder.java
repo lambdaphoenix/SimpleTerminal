@@ -34,22 +34,32 @@ public class ConsoleBuilder {
   private final StringBuilder buf = new StringBuilder();
 
   /** Current rule width for horizontal separators. */
-  private int ruleWidth = ConsoleConfig.DEFAULT_RULE_WIDTH;
+  private int ruleWidth;
 
   /** Current unit of indentation (e.g. spaces or tab). */
-  private String indentUnit = ConsoleConfig.DEFAULT_INDENT_UNIT;
+  private String indentUnit;
 
   /** Current locale for message lookup. */
-  private Locale locale = ConsoleConfig.DEFAULT_LOCALE;
+  private Locale locale;
 
   /** Resource bundle for localized messages. */
-  private ResourceBundle resources = ResourceBundle.getBundle("messages", this.locale);
+  private ResourceBundle resources;
 
   /** Current default box style for framed content. */
-  private BoxStyle boxStyle = ConsoleConfig.DEFAULT_BOX_STYLE;
+  private BoxStyle boxStyle;
 
   /** Current indentation level (non-negative). */
   private int indent = 0;
+
+  /**
+   * Creates a new {@code ConsoleBuilder} with default configuration values.
+   */
+  public ConsoleBuilder() {
+    this.ruleWidth = ConsoleConfig.DEFAULT_RULE_WIDTH;
+    this.indentUnit = ConsoleConfig.DEFAULT_INDENT_UNIT;
+    this.locale(ConsoleConfig.DEFAULT_LOCALE);
+    this.boxStyle = ConsoleConfig.DEFAULT_BOX_STYLE;
+  }
 
   /**
    * Returns the maximum string length in an array of lines.
@@ -397,9 +407,4 @@ public class ConsoleBuilder {
     this.newline();
     this.print();
   }
-
-  /**
-   * Creates a new {@code ConsoleBuilder} with default configuration values.
-   */
-  public ConsoleBuilder() {}
 }
