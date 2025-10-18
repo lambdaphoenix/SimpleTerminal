@@ -3,35 +3,45 @@ package io.github.lambdaphoenix.simpleterminal.core;
 import io.github.lambdaphoenix.simpleterminal.ansi.AnsiColor;
 import io.github.lambdaphoenix.simpleterminal.ansi.AnsiStyle;
 import io.github.lambdaphoenix.simpleterminal.box.BoxStyle;
+import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 /**
  * Provides a fluent API for building styled console output.
  *
- * <p>The {@code ConsoleBuilder} class allows the creation of formatted text with ANSI colors,
- * styles, indentation, rules, and boxed content. Output can be accumulated in an internal buffer
- * and then printed to the console.
+ * <p>The {@code ConsoleBuilder} class allows the creation of formatted text with ANSI colors, styles, indentation, rules, and boxed content. The {@code ConsoleBuilder} accumulates formatted text in an internal buffer and writes it to a configurable {@link java.io.PrintWriter}. By default, it writes to {@code System.out}, but alternative output streams can be injected for testing or custom environments.
  *
  * <h2>Usage Example:</h2>
  *
  * <pre>{@code
  * ConsoleBuilder cb = new ConsoleBuilder();
- * cb.color(AnsiColor.GREEN)
- *   .style(AnsiStyle.BOLD)
- *   .text("Hello, world!")
- *   .reset()
- *   .println();
+ * cb
+ *  .useFallback(false)
+ *  .locale(Locale.ENGLISH)
+ *  .color(AnsiColor.GREEN)
+ *  .style(AnsiStyle.BOLD)
+ *  .text("Hello, world!")
+ *  .reset()
+ *  .println();
  * }</pre>
  *
  * @author lambdaphoenix
- * @version 2025-09-25
+ * @version 0.2.0 (2025-10-18)
  * @since 0.1.0
  */
 public class ConsoleBuilder {
   /** Internal buffer used to accumulate console output before printing or returning as a string. */
   private final StringBuilder buf = new StringBuilder();
+
+  /**
+   * The writer used to emit console output. Defaults to {@code System.out}, but can be replaced for testing or redirection.
+   *
+   * @since 0.2.0
+   */
+  private final PrintWriter out;
 
   /** Current rule width for horizontal separators. */
   private int ruleWidth;
@@ -39,24 +49,39 @@ public class ConsoleBuilder {
   /** Current unit of indentation (e.g. spaces or tab). */
   private String indentUnit;
 
-  /** Current locale for message lookup. */
-  private Locale locale;
-
   /** Resource bundle for localized messages. */
   private ResourceBundle resources;
 
   /** Current default box style for framed content. */
   private BoxStyle boxStyle;
 
+  /**
+   * Weather to allow {@link java.util.ResourceBundle} fallback for this builder instance.
+   *
+   * @since 0.2.0
+   */
+  private boolean useFallback;
+
   /** Current indentation level (non-negative). */
   private int indent = 0;
 
   /**
-   * Creates a new {@code ConsoleBuilder} with default configuration values.
+   * Creates a new {@code ConsoleBuilder} writing to {@code System.out}.
    */
   public ConsoleBuilder() {
+    this(new PrintWriter(System.out, true));
+  }
+  /**
+   * Creates a new {@code ConsoleBuilder} writing to the given output writer.
+   *
+   * @param out the writer to use for output (must not be {@code null})
+   * @since 0.2.0
+   */
+  public ConsoleBuilder(PrintWriter out) {
+    this.out = java.util.Objects.requireNonNull(out, "Output writer must not be null");
     this.ruleWidth = ConsoleConfig.DEFAULT_RULE_WIDTH;
     this.indentUnit = ConsoleConfig.DEFAULT_INDENT_UNIT;
+    this.useFallback = ConsoleConfig.DEFAULT_USE_FALLBACK;
     this.locale(ConsoleConfig.DEFAULT_LOCALE);
     this.boxStyle = ConsoleConfig.DEFAULT_BOX_STYLE;
   }
@@ -111,12 +136,44 @@ public class ConsoleBuilder {
   /**
    * Sets the locale for message lookup.
    *
+   * <p>If {@link #useFallback(boolean)} is set to {@code true}, Java's normal fallback chain is
+   * used, which may load bundles for the system default locale. If set to {@code false}, only the
+   * requested locale and the base bundle {@code messages.properties} are considered.
+   *
    * @param locale the locale to use
    * @return this builder for chaining
    */
   public ConsoleBuilder locale(Locale locale) {
-    this.locale = locale;
-    this.resources = ResourceBundle.getBundle("messages", this.locale);
+    if (this.useFallback) {
+      this.resources = ResourceBundle.getBundle("messages", locale);
+    } else {
+      ResourceBundle.Control noFallback =
+          ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_DEFAULT);
+      this.resources = ResourceBundle.getBundle("messages", locale, noFallback);
+    }
+    return this;
+  }
+
+  /**
+   * Controls whether this builder instance allows {@link java.util.ResourceBundle} to fall back to
+   * the JVM default locale.
+   *
+   * <p>If {@code true} (default, inherited from {@link ConsoleConfig#DEFAULT_USE_FALLBACK}), Java's
+   * normal fallback chain is used. If {@code false}, only the requested locale and the base bundle
+   * {@code messages.properties} are considered. If neither exists, a {@code
+   * java.util.MissingResourceException} is thrown.
+   *
+   * <p>This setting overrides the global default for this builder instance only.
+   *
+   * <p><b>Important:</b> This setting only takes effect the next time {@link #locale(Locale)} is
+   * called. Changing it does not retroactively reload an already loaded bundle.
+   *
+   * @param useFallback whether to allow fallback
+   * @return this builder for chaining
+   * @since 0.2.0
+   */
+  public ConsoleBuilder useFallback(boolean useFallback) {
+    this.useFallback = useFallback;
     return this;
   }
 
@@ -306,9 +363,11 @@ public class ConsoleBuilder {
    * @param title the box title (may be null or blank)
    * @param content the box content
    * @param style the box style to use
+   * @throws NullPointerException if {@code content} is {@code null}
    * @return this builder for chaining
    */
   public ConsoleBuilder box(String title, String content, BoxStyle style) {
+    Objects.requireNonNull(content, "Content must not be null");
     String[] lines = content.split("\\R", -1);
     int max =
         title != null && !title.isBlank() ? Math.max(title.length(), maxLen(lines)) : maxLen(lines);
@@ -361,17 +420,16 @@ public class ConsoleBuilder {
   }
 
   /**
-   * Executes the given supplier if the condition is true.
-   * <p>
-   * This allows conditional building of console output in a fluent style.
-   * </p>
+   * Executes the given action if the condition is true.
+   *
+   * <p>This allows conditional building of console output in a fluent style.
    *
    * @param condition the condition to evaluate
-   * @param then the supplier that is executed if {@code condition} is true
+   * @param action the action that is executed if {@code condition} is true
    * @return this builder for chaining
    */
-  public ConsoleBuilder when(boolean condition, Supplier<ConsoleBuilder> then) {
-    if (condition) then.get();
+  public ConsoleBuilder when(boolean condition, Consumer<ConsoleBuilder> action) {
+    if (condition) action.accept(this);
     return this;
   }
 
@@ -394,14 +452,15 @@ public class ConsoleBuilder {
     return this;
   }
 
-  /** Prints the accumulated output to {@code System.out} and clears the buffer. */
+  /** Prints the accumulated output without a newline and clears the buffer. */
   public void print() {
-    System.out.print(this.build());
+    out.print(this.build());
+    out.flush();
     this.clear();
   }
 
   /**
-   * Appends a newline, prints the accumulated output to {@code System.out}, and clears the buffer.
+   * Appends a newline, prints the accumulated output, and clears the buffer.
    */
   public void println() {
     this.newline();

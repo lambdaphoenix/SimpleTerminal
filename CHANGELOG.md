@@ -1,4 +1,14 @@
 # Changelog
+## [0.2.0] - 2025-10-18
+### Changed
+- `ConsoleBuilder.when()` now takes a `Consumer<ConsoleBuilder>` instead of `Supplier`.
+- Reworked JUnit tests for core functionality.
+
+### Added
+- `ConsoleBuilder.useFallback(boolean)` to control ResourceBundle fallback behavior.
+- `requireNonNull` checks for critical parameters.
+- Configurable input/output streams for `ConsoleBuilder` and `Prompt` (no longer bound to `System.in/out`).
+- `Prompt.askYesNo` now supports language equivalents (e.g. "ja"/"nein", "yes"/"no").
 
 ---
 ## [0.1.0] - 2025-09-25

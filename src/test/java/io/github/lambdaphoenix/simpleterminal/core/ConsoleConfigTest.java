@@ -2,21 +2,20 @@ package io.github.lambdaphoenix.simpleterminal.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.lambdaphoenix.simpleterminal.box.BoxStyle;
 import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 class ConsoleConfigTest {
 
   @Test
-  void testDefaults() {
-    assertEquals(80, ConsoleConfig.DEFAULT_RULE_WIDTH);
-    assertEquals("  ", ConsoleConfig.DEFAULT_INDENT_UNIT);
-    assertEquals(Locale.ENGLISH, ConsoleConfig.DEFAULT_LOCALE);
-  }
-
-  @Test
-  void loadDefaults() { // TODO test if working
+  void loadDefaults() {
     ConsoleConfig.loadDefaults();
-    assertNotNull(ConsoleConfig.DEFAULT_INDENT_UNIT);
+
+    assertEquals(99, ConsoleConfig.DEFAULT_RULE_WIDTH);
+    assertEquals("..", ConsoleConfig.DEFAULT_INDENT_UNIT);
+    assertEquals(Locale.FRENCH, ConsoleConfig.DEFAULT_LOCALE);
+    assertEquals(BoxStyle.ASCII, ConsoleConfig.DEFAULT_BOX_STYLE);
+    assertTrue(ConsoleConfig.DEFAULT_USE_FALLBACK);
   }
 }

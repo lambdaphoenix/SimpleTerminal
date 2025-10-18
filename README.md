@@ -22,27 +22,8 @@ SimpleTerminal provides a fluent API for ANSI colors, text styles, box rendering
   Message lookup via `ResourceBundle` (`messages.properties`).
 - **Configurable Defaults** ⚙️  
   Rule width, indent unit, locale, and box style via `ConsoleConfig` or `simpleterminal.properties`.
-
----
-
-## 📦 Installation
-
-### Gradle (Kotlin DSL)
-
-```kotlin
-dependencies {
-    implementation("io.github.lambdaphoenix:simpleterminal:0.1.0")
-}
-```
-### Maven
-
-```Xml
-<dependency>
-  <groupId>io.github.lambdaphoenix</groupId>
-  <artifactId>simpleterminal</artifactId>
-  <version>0.1.0</version>
-</dependency>
-```
+- **Configurable I/O Streams** 🔄  
+  Inject your own input/output streams instead of relying on `System.in/out`.
 
 ---
 
@@ -82,6 +63,30 @@ void main() throws IOException {
   Prompt prompt = new Prompt(new ConsoleBuilder());
   boolean cont = prompt.askYesNo("Continue?");
   System.out.println("Answer: " + cont);
+}
+```
+
+### Redirect
+```java
+import io.github.lambdaphoenix.simpleterminal.core.ConsoleBuilder;
+import io.github.lambdaphoenix.simpleterminal.prompt.Prompt;
+
+import java.io.*;
+
+void main() throws IOException {
+    ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
+    PrintWriter writer = new PrintWriter(outBuffer, true);
+
+    String simulatedInput = "y\n";
+    BufferedReader reader = new BufferedReader(new StringReader(simulatedInput));
+
+    ConsoleBuilder cb = new ConsoleBuilder(writer);
+    Prompt prompt = new Prompt(cb, reader);
+
+    boolean cont = prompt.askYesNo("Continue?");
+
+    System.out.println("Answer: " + cont);
+    System.out.println("Captured Output:\n" + outBuffer);
 }
 ```
 

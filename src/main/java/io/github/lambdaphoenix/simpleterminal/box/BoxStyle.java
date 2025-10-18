@@ -24,9 +24,8 @@ package io.github.lambdaphoenix.simpleterminal.box;
  * @param junctionLeft the character used for junctions on the left side
  * @param junctionRight the character used for junctions on the right side
  * @param junctionHorizontal the character used for horizontal junction lines
- *
  * @author lambdaphoenix
- * @version 2025-09-25
+ * @version 0.2.0 (2025-10-18)
  * @since 0.1.0
  */
 public record BoxStyle(

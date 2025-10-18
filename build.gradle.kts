@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "io.github.lambdaphoenix"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Java library for styled console output and interactive prompts"
 
 repositories {

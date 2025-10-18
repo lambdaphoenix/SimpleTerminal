@@ -16,7 +16,7 @@ package io.github.lambdaphoenix.simpleterminal.core;
  * }</pre>
  *
  * @author lamdaphoenix
- * @version 2025-09-25
+ * @version 0.2.0 (2025-10-18)
  * @since 0.1.0
  */
 public class ValidationException extends RuntimeException {

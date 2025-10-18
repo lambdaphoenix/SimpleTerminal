@@ -21,13 +21,14 @@ import java.util.Properties;
  * ConsoleConfig.DEFAULT_INDENT_UNIT = "  ";
  * ConsoleConfig.DEFAULT_LOCALE = Locale.GERMAN;
  * ConsoleConfig.DEFAULT_BOX_STYLE = BoxStyle.DOUBLE;
+ * ConsoleConfig.USE_FALLBACK = true; // enable fallback to JVM default locale
  *
  * // Or load from properties file
  * ConsoleConfig.loadDefaults();
  * }</pre>
  *
  * @author lambdaphoenix
- * @version 2025-09-25
+ * @version 0.2.0 (2025-10-18)
  * @since 0.1.0
  */
 public final class ConsoleConfig {
@@ -60,6 +61,20 @@ public final class ConsoleConfig {
    */
   public static BoxStyle DEFAULT_BOX_STYLE = BoxStyle.UNICODE;
 
+  /**
+   * Whether to allow {@link java.util.ResourceBundle} to fall back to the JVM default locale if no
+   * bundle for the requested locale is found.
+   *
+   * <p>If {@code true} (default), Java's normal fallback chain is used, which may load bundles for
+   * the system default locale (e.g. {@code de_DE}) instead on the base bundle.
+   *
+   * <p>If {@code false}, only the requested locale and the base bundle {@code messages.properties}
+   * are considered. If neither exists, a {@code java.util.MissingResourceException} is thrown.
+   *
+   * @since 0.2.0
+   */
+  public static boolean DEFAULT_USE_FALLBACK = false;
+
   /** Private constructor to prevent instantiation. */
   private ConsoleConfig() {}
 
@@ -73,6 +88,8 @@ public final class ConsoleConfig {
    *   <li>{@code indent.unit} - string value for indentation unit
    *   <li>{@code locale} - BCP 47 language tag (e.g. {@code en}, {@code de-DE})
    *   <li>{@code box.style} - name of a predefined {@link BoxStyle}
+   *   <li>{@code use.fallback} - boolean flag (true/false) whether to allow fallback to JVM default
+   *       locale
    * </ul>
    *
    * If the file is not found, defaults remain unchanged.
@@ -90,9 +107,10 @@ public final class ConsoleConfig {
       if (props.containsKey("indent.unit")) DEFAULT_INDENT_UNIT = props.getProperty("indent.unit");
       if (props.containsKey("locale"))
         DEFAULT_LOCALE = Locale.forLanguageTag(props.getProperty("locale"));
-      if (props.containsKey("box.style")) {
+      if (props.containsKey("box.style"))
         DEFAULT_BOX_STYLE = BoxStyle.fromName(props.getProperty("box.style"));
-      }
+      if (props.containsKey("use.fallback"))
+        DEFAULT_USE_FALLBACK = Boolean.parseBoolean(props.getProperty("use.fallback"));
     } catch (IOException _) {
     }
   }
